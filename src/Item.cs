@@ -3,9 +3,15 @@ namespace ItemSpace;
 public class Items
 {
     public string? Name { get; }
-    private double Quantity { get; set; }
-    private DateTime CreatedDate { get; set; }
-    public Items(string name, double quantity = 0, DateTime createdDate = default)
+    private double quantity;
+    public double Quantity
+    {
+        get { return quantity; }
+        set { quantity = value; }
+    }
+    private DateTime? CreatedDate { get; set; }
+    public Items() { }
+    public Items(string name, double quantity, DateTime createdDate = default)
     {
         try
         {
@@ -15,15 +21,22 @@ public class Items
             }
             Name = name;
             Quantity = quantity;
-            CreatedDate = createdDate == default ? DateTime.Now : createdDate ;
+            CreatedDate = createdDate == default ? DateTime.Now : createdDate;
         }
         catch (Exception error)
         {
-          Console.WriteLine("Error: " + error.Message);
+            Console.WriteLine("Error: " + error.Message);
         }
     }
     public override string ToString()
     {
-        return $"Item Name: {Name},Quantity: {Quantity},Created Date: {CreatedDate}";
+        if (!string.IsNullOrEmpty(Name) && Quantity >= 0 && CreatedDate != null)
+        {
+            return $"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate}";
+        }
+        else
+        {
+            return "Not Have Any Items";
+        }
     }
 }
