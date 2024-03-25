@@ -3,13 +3,13 @@ namespace ItemSpace;
 public class Items
 {
     public string? Name { get; }
-    private double quantity;
+    private double _quantity;
     public double Quantity
     {
-        get { return quantity; }
-        set { quantity = value; }
+        get { return _quantity; }
+        set { _quantity = value; }
     }
-    private DateTime? CreatedDate { get; set; }
+    private DateTime? _CreatedDate { get; set; }
     public Items() { }
     public Items(string name, double quantity, DateTime createdDate = default)
     {
@@ -21,7 +21,7 @@ public class Items
             }
             Name = name;
             Quantity = quantity;
-            CreatedDate = createdDate == default ? DateTime.Now : createdDate;
+            _CreatedDate = createdDate == default ? DateTime.Now : createdDate;
         }
         catch (Exception error)
         {
@@ -30,9 +30,9 @@ public class Items
     }
     public override string ToString()
     {
-        if (!string.IsNullOrEmpty(Name) && Quantity >= 0 && CreatedDate != null)
+        if (!string.IsNullOrEmpty(Name) && Quantity >= 0 && _CreatedDate != null)
         {
-            return $"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate}";
+            return $"Item Name: {Name}, Quantity: {Quantity}, Created Date: {_CreatedDate}";
         }
         else
         {
