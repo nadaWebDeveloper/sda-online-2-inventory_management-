@@ -34,8 +34,8 @@ class Programs
       Items resultSearch = store.FindItemByName("sandwiches");
       Console.WriteLine($"\t\t\tResult Of Search:\n {resultSearch}\n\t\t\t ----------");
 
-      var collectionData = store.SortByNameAsc();
-      Console.WriteLine($"\t\t    Ascending Order By Name:");
+      var collectionData = store.SortByName(SortOrder.DESC);
+      Console.WriteLine($"\t\t    Sort Order By Name:");
       foreach (var item in collectionData)
       {
          Console.WriteLine($"{item}");

@@ -28,7 +28,7 @@ class Stores
             Console.WriteLine($"This Item '{newItem.Name}' Already Exists");
             return;
         }
-        if (_ItemsInventory.Count < CurrentCapacity)
+        if (_ItemsInventory.Count < MaximumCapacity)
         {
             _ItemsInventory.Add(newItem);
             Console.WriteLine($"Item '{newItem.Name}' added to the inventory Successfully.");
@@ -76,8 +76,25 @@ class Stores
         Items? foundItem = _ItemsInventory.FirstOrDefault(item => item.Name?.ToLower() == itemName?.ToLower());
         return foundItem ?? new Items();
     }
-    public List<Items> SortByNameAsc()
+    public List<Items> SortByName(SortOrder sortOrder)
     {
-        return _ItemsInventory.OrderBy(item => item.Name).ToList();
+        try
+        {
+            switch (sortOrder)
+            {
+                case SortOrder.ASC:
+                    return _ItemsInventory.OrderBy(item => item.Name).ToList();
+                case SortOrder.DESC:
+                    return _ItemsInventory.OrderByDescending(item => item.Name).ToList();
+                default:
+                    throw new ArgumentException("Invalid sort order specified.");
+            }
+        }
+        catch (Exception error)
+        {
+            Console.WriteLine($"{error.Message}");
+             return new List<Items>();
+
+        }
     }
 }
