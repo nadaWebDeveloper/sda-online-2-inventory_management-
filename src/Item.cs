@@ -19,6 +19,10 @@ public class Items
             {
                 throw new Exception("Quantity can not be negative");
             }
+             if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new Exception("Name field is Required");
+            }
             Name = name;
             Quantity = quantity;
             _CreatedDate = createdDate == default ? DateTime.Now : createdDate;

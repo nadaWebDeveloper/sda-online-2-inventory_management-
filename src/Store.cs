@@ -1,13 +1,23 @@
+using System.ComponentModel.DataAnnotations;
 using ItemSpace;
 namespace StoreSpace;
 
 class Stores
 {
     private List<Items> _ItemsInventory;
-    private int _MaximumCapacity;
+    private int _maximumCapacity;
+    public int MaximumCapacity
+    {
+        get { return _maximumCapacity; }
+    }
+    public int CurrentCapacity
+    {
+        get { return _ItemsInventory.Count; }
+    }
+
     public Stores(int maximumCapacity)
     {
-        _MaximumCapacity = maximumCapacity;
+        this._maximumCapacity = maximumCapacity;
         _ItemsInventory = new List<Items>();
     }
     public void AddItem(Items newItem)
@@ -18,7 +28,7 @@ class Stores
             Console.WriteLine($"This Item '{newItem.Name}' Already Exists");
             return;
         }
-        if (_ItemsInventory.Count < _MaximumCapacity)
+        if (_ItemsInventory.Count < CurrentCapacity)
         {
             _ItemsInventory.Add(newItem);
             Console.WriteLine($"Item '{newItem.Name}' added to the inventory Successfully.");
@@ -43,13 +53,19 @@ class Stores
     }
     public void PrintItems()
     {
-        Console.WriteLine($"\t\t\tPrint All Items:");
-        foreach (var newItem in _ItemsInventory)
+        if (_ItemsInventory.Count > 0)
         {
-            Console.WriteLine($"{newItem}");
+            Console.WriteLine($"\t\t\tPrint All Items:");
+            foreach (var newItem in _ItemsInventory)
+            {
+                Console.WriteLine($"{newItem}");
+            }
+            Console.WriteLine($"\t\t\t ----------");
         }
-        Console.WriteLine($"\t\t\t ----------");
-
+        else
+        {
+            Console.WriteLine($"Not Have List Of Item");
+        }
     }
     public double GetCurrentVolume()
     {
