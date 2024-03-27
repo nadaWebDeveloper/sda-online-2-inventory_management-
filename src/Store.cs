@@ -4,6 +4,7 @@ namespace StoreSpace;
 
 class Store
 {
+    BorderSecondSpace.BorderSecond border = new BorderSecondSpace.BorderSecond();
     private List<Item> _itemsInventory;
     private int _maximumCapacity;
     public int MaximumCapacity
@@ -21,49 +22,73 @@ class Store
     }
     public void AddItem(Item newItem)
     {
-        bool isItemExist = _itemsInventory.Any((item) => item.Name?.ToLower() == newItem.Name?.ToLower());
-        if (isItemExist)
+        try
         {
-            Console.WriteLine($"This Item '{newItem.Name}' Already Exists");
-            return;
+            bool isItemExist = _itemsInventory.Any((item) => item.Name?.ToLower() == newItem.Name?.ToLower());
+            if (isItemExist)
+            {
+                border.SecondBorder($"↺ This Item '{newItem.Name}' Already Exists", ConsoleColor.Gray, ConsoleColor.DarkGray);
+            }
+            if (_itemsInventory.Sum(item => item.Quantity) + newItem.Quantity <= MaximumCapacity)
+            {
+                _itemsInventory.Add(newItem);
+                border.SecondBorder($"✔ Item '{newItem.Name}' added to the inventory Successfully.", ConsoleColor.DarkGreen, ConsoleColor.Green);
+            }
+            else
+            {
+                border.SecondBorder("✗ Inventory is full. Cannot add more items.", ConsoleColor.DarkRed, ConsoleColor.Red);
+                throw new Exception();
+            }
         }
-        if (_itemsInventory.Sum(item => item.Quantity) + newItem.Quantity <= MaximumCapacity)
+        catch (Exception error)
         {
-            _itemsInventory.Add(newItem);
-            Console.WriteLine($"Item '{newItem.Name}' added to the inventory Successfully.");
-        }
-        else
-        {
-            Console.WriteLine("Inventory is full. Cannot add more items.");
+            Console.WriteLine(error.Message);
         }
     }
     public void DeleteItem(string itemName)
     {
-        Item? deletedItem = _itemsInventory.FirstOrDefault((item) => item.Name?.ToLower() == itemName.ToLower());
-        if (deletedItem != null)
+        try
         {
-            _itemsInventory.Remove(deletedItem);
-            Console.WriteLine($"Deleted Item '{itemName}' Successfully");
+            Item? deletedItem = _itemsInventory.FirstOrDefault((item) => item.Name?.ToLower() == itemName.ToLower());
+            if (deletedItem != null)
+            {
+                _itemsInventory.Remove(deletedItem);
+                border.SecondBorder($"✔ Deleted Item '{itemName}' Successfully", ConsoleColor.DarkGreen, ConsoleColor.Green);
+            }
+            else
+            {
+                border.SecondBorder($"✗ Item '{itemName}' Not Founded on Store", ConsoleColor.DarkRed, ConsoleColor.Red);
+                throw new Exception();
+            }
         }
-        else
+        catch (Exception error)
         {
-            Console.WriteLine($"Item '{itemName}' Not Founded on Store");
+            Console.WriteLine($"{error.Message}");
         }
     }
     public void PrintItems()
     {
-        if (_itemsInventory.Count > 0)
+        try
         {
-            Console.WriteLine($"\t\t\tPrint All Items:");
-            foreach (var newItem in _itemsInventory)
+            if (_itemsInventory.Count > 0)
             {
-                Console.WriteLine($"{newItem}");
+                Console.WriteLine($"\t\t\tPrint All Items:");
+                foreach (var newItem in _itemsInventory)
+                {
+                    Console.WriteLine($"{newItem}");
+                }
+                Console.WriteLine($"\t\t\t ----------");
             }
-            Console.WriteLine($"\t\t\t ----------");
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                throw new Exception($"Not Have List Of Item");
+            }
         }
-        else
+        catch (Exception error)
         {
-            Console.WriteLine($"Not Have List Of Item");
+            Console.WriteLine($"{error.Message}");
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
     public double GetCurrentVolume()
@@ -73,55 +98,35 @@ class Store
     public Item? FindItemByName(string itemName)
     {
         Item? foundItem = _itemsInventory.FirstOrDefault(item => item.Name?.ToLower() == itemName?.ToLower());
-        return foundItem ;
+        return foundItem;
     }
     public List<Item> SortByName(SortOrder sortOrder)
     {
-        try
-        {
-            switch (sortOrder)
-            {
-                case SortOrder.ASC:
-                    return _itemsInventory.OrderBy(item => item.Name).ToList();
-                case SortOrder.DESC:
-                    return _itemsInventory.OrderByDescending(item => item.Name).ToList();
-                default:
-                    throw new ArgumentException("Invalid sort order specified.");
-            }
-        }
-        catch (Exception error)
-        {
-            Console.WriteLine($"{error.Message}");
-            return new List<Item>();
-        }
-    }public Dictionary<string, List<Item>> GroupByDate()
+        return sortOrder == SortOrder.ASC ?
+             _itemsInventory.OrderBy(item => item.Name).ToList()
+             : _itemsInventory.OrderByDescending(item => item.Name).ToList();
+    }
+    public Dictionary<string, List<Item>> GroupByDate()
     {
-        DateTime currentDate = DateTime.Now;
-        int currentMonth = currentDate.Month;
-        int currentYear = currentDate.Year;
+        var currentMonth = DateTime.Now.AddMonths(-3);
 
-        DateTime cutoffDate = currentDate.AddMonths(-3);
+        var groupedItems = _itemsInventory.GroupBy(
+            item => item.CreatedDate >= currentMonth ? "New Arrival Items" : "Old Items"
+        ).ToDictionary(
+            group => group.Key,
+            group => group.ToList()
+        );
 
-        Dictionary<string, List<Item>> categorizedItems = new Dictionary<string, List<Item>>();
-        categorizedItems.Add("New Arrival Items", new List<Item>());
-        categorizedItems.Add("Old Items", new List<Item>());
-
-        foreach (Item item in _itemsInventory)
+        foreach (var group in groupedItems)
         {
-            if (item.CreatedDate.Year == currentYear && item.CreatedDate.Month >= currentMonth - 2)
+            Console.WriteLine($"{group.Key}:");
+            foreach (var item in group.Value)
             {
-                // categorizedItems["New Arrival Items"].Add(item);
-                                categorizedItems["Old Items"].Add(item);
-
+                Console.WriteLine($"- {item.Name} ({item.CreatedDate:MMMM yyyy})");
             }
-            else
-            {
-                // categorizedItems["Old Items"].Add(item);
-                 categorizedItems["New Arrival Items"].Add(item);
-
-            }
+            Console.WriteLine();
         }
 
-        return categorizedItems;
+        return groupedItems;
     }
 }
