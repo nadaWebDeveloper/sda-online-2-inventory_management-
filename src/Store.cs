@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using ItemSpace;
 namespace StoreSpace;
 
@@ -108,7 +107,6 @@ class Store
     }
     public Dictionary<string, List<Item>> GroupByDate()
     {
-        // var currentMonth = DateTime.Now.AddMonths(-3);
          int currentMonth = DateTime.Now.Month;
 
         // Calculate the month range for new arrivals (last three months)
@@ -116,7 +114,6 @@ class Store
         if (startMonth <= 0){
             startMonth += 12; // Adjust for negative values
         }
-        // int endMonth = currentMonth;
 
         var groupedItems = _itemsInventory.GroupBy(
             item =>  item.CreatedDate.Month >= startMonth && item.CreatedDate.Month <= currentMonth  ? "New Arrival Items" : "Old Items"

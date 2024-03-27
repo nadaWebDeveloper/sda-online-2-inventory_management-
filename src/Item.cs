@@ -42,7 +42,7 @@ public class Item
     }
     public override string ToString()
     {
-          border.SecondBorder($"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate.ToString("MMMM/dd/yyyy")}", ConsoleColor.Cyan, ConsoleColor.DarkCyan);
+      border.SecondBorder($"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate.ToString("MMMM/dd/yyyy")}", ConsoleColor.Cyan, ConsoleColor.DarkCyan);
       return $"-";
     }
 }
