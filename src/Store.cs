@@ -127,7 +127,7 @@ class Store
 
         foreach (var group in groupedItems)
         {
-            Console.WriteLine($"{group.Key} :");
+            Console.WriteLine($"\n\x1b[1m| {group.Key} : \x1b");
             foreach (var item in group.Value)
             {
                 Console.WriteLine($"- {item.Name} ({item.CreatedDate.ToString("MMMM/dd/yyyy")})");

@@ -2,6 +2,8 @@ namespace ItemSpace;
 
 public class Item
 {
+     BorderSecondSpace.BorderSecond border = new BorderSecondSpace.BorderSecond();
+
     public string? Name { get; }
     private double _quantity;
     public double Quantity
@@ -9,11 +11,10 @@ public class Item
         get { return _quantity; }
         set { _quantity = value; }
     }
-    private DateTime _createdDate;
     public DateTime CreatedDate
     {
-        get { return _createdDate; }
-        set { _createdDate = default; }
+        get;
+        set;
     }
     public Item(string name, double quantity, DateTime createdDate = default)
     {
@@ -21,11 +22,13 @@ public class Item
         {
             if (quantity < 0)
             {
-                throw new Exception("Quantity can not be negative");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                throw new Exception("✗ Quantity can not be negative");
             }
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new Exception("Name field is Required");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                throw new Exception("✗ Name field is Required");
             }
             Name = name;
             Quantity = quantity;
@@ -34,17 +37,12 @@ public class Item
         catch (Exception error)
         {
             Console.WriteLine("Error: " + error.Message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
     public override string ToString()
     {
-        // if (!string.IsNullOrEmpty(Name) && Quantity >= 0 && CreatedDate != null)
-        // {
-            return $"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate}";
-        // }
-        // else
-        // {
-        //     return "Not Have Any Items";
-        // }
+          border.SecondBorder($"Item Name: {Name}, Quantity: {Quantity}, Created Date: {CreatedDate.ToString("MMMM/dd/yyyy")}", ConsoleColor.Cyan, ConsoleColor.DarkCyan);
+      return $"-";
     }
 }
