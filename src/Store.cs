@@ -108,10 +108,18 @@ class Store
     }
     public Dictionary<string, List<Item>> GroupByDate()
     {
-        var currentMonth = DateTime.Now.AddMonths(-3);
+        // var currentMonth = DateTime.Now.AddMonths(-3);
+         int currentMonth = DateTime.Now.Month;
+
+        // Calculate the month range for new arrivals (last three months)
+        int startMonth = currentMonth - 2;
+        if (startMonth <= 0){
+            startMonth += 12; // Adjust for negative values
+        }
+        // int endMonth = currentMonth;
 
         var groupedItems = _itemsInventory.GroupBy(
-            item => item.CreatedDate >= currentMonth ? "New Arrival Items" : "Old Items"
+            item =>  item.CreatedDate.Month >= startMonth && item.CreatedDate.Month <= currentMonth  ? "New Arrival Items" : "Old Items"
         ).ToDictionary(
             group => group.Key,
             group => group.ToList()
@@ -119,10 +127,10 @@ class Store
 
         foreach (var group in groupedItems)
         {
-            Console.WriteLine($"{group.Key}:");
+            Console.WriteLine($"{group.Key} :");
             foreach (var item in group.Value)
             {
-                Console.WriteLine($"- {item.Name} ({item.CreatedDate:MMMM yyyy})");
+                Console.WriteLine($"- {item.Name} ({item.CreatedDate.ToString("MMMM/dd/yyyy")})");
             }
             Console.WriteLine();
         }
