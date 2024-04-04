@@ -1,9 +1,6 @@
-
-
-In this assignment, you will create a simple inventory management system which allows users to add, remove, and view items in the inventory.
-
 $${\color{green} \large   Inventory \space Management \space 🔝 \space 🎯 }$$
 -
+<h3  align="center" > In this assignment, you will create a simple inventory management system which allows users to add, remove, and view items in the inventory. </h3>
 
 ##  Level 1 - *Mandatory*
 - [x] ~~Create `class Item`, which has name (readonly), quantity, and created date, which are private. Amount of each item cannot be negative. Provide the following features:~~
