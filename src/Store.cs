@@ -1,9 +1,8 @@
 using ItemSpace;
 namespace StoreSpace;
-
+using BorderSecondSpace;
 class Store
 {
-    BorderSecondSpace.BorderSecond border = new BorderSecondSpace.BorderSecond();
     private List<Item> _itemsInventory;
     private int _maximumCapacity;
     public int MaximumCapacity
@@ -21,48 +20,36 @@ class Store
     }
     public void AddItem(Item newItem)
     {
-        try
+        bool isItemExist = _itemsInventory.Any((item) => item.Name?.ToLower() == newItem.Name?.ToLower());
+        if (isItemExist)
         {
-            bool isItemExist = _itemsInventory.Any((item) => item.Name?.ToLower() == newItem.Name?.ToLower());
-            if (isItemExist)
-            {
-                border.SecondBorder($"↺ This Item '{newItem.Name}' Already Exists", ConsoleColor.Gray, ConsoleColor.DarkGray);
-            }
-            if (_itemsInventory.Sum(item => item.Quantity) + newItem.Quantity <= MaximumCapacity)
-            {
-                _itemsInventory.Add(newItem);
-                border.SecondBorder($"✔ Item '{newItem.Name}' added to the inventory Successfully.", ConsoleColor.DarkGreen, ConsoleColor.Green);
-            }
-            else
-            {
-                border.SecondBorder("✗ Inventory is full. Cannot add more items.", ConsoleColor.DarkRed, ConsoleColor.Red);
-                throw new Exception();
-            }
+            BorderSecond.SecondBorder($"↺ This Item '{newItem.Name}' Already Exists", ConsoleColor.Gray, ConsoleColor.DarkGray);
+            return;
         }
-        catch (Exception error)
+        if (_itemsInventory.Sum(item => item.Quantity) + newItem.Quantity <= MaximumCapacity)
         {
-            Console.WriteLine(error.Message);
+            _itemsInventory.Add(newItem);
+            BorderSecond.SecondBorder($"✔ Item '{newItem.Name}' added to the inventory Successfully.", ConsoleColor.DarkGreen, ConsoleColor.Green);
         }
+        else
+        {
+            BorderSecond.SecondBorder("✘ Inventory is full. Cannot add more items.", ConsoleColor.DarkRed, ConsoleColor.Red);
+            return;
+        }
+
     }
     public void DeleteItem(string itemName)
     {
-        try
+        Item? deletedItem = _itemsInventory.FirstOrDefault((item) => item.Name?.ToLower() == itemName.ToLower());
+        if (deletedItem != null)
         {
-            Item? deletedItem = _itemsInventory.FirstOrDefault((item) => item.Name?.ToLower() == itemName.ToLower());
-            if (deletedItem != null)
-            {
-                _itemsInventory.Remove(deletedItem);
-                border.SecondBorder($"✔ Deleted Item '{itemName}' Successfully", ConsoleColor.DarkGreen, ConsoleColor.Green);
-            }
-            else
-            {
-                border.SecondBorder($"✗ Item '{itemName}' Not Founded on Store", ConsoleColor.DarkRed, ConsoleColor.Red);
-                throw new Exception();
-            }
+            _itemsInventory.Remove(deletedItem);
+            BorderSecond.SecondBorder($"✔ Deleted Item '{itemName}' Successfully", ConsoleColor.DarkGreen, ConsoleColor.Green);
         }
-        catch (Exception error)
+        else
         {
-            Console.WriteLine($"{error.Message}");
+            BorderSecond.SecondBorder($"✘ Item '{itemName}' Not Founded on Store", ConsoleColor.DarkRed, ConsoleColor.Red);
+            return;
         }
     }
     public void PrintItems()
@@ -71,67 +58,119 @@ class Store
         {
             if (_itemsInventory.Count > 0)
             {
-                Console.WriteLine($"\t\t\tPrint All Items:");
+                int boxWidth = 150;
+                Console.WriteLine($"\t\t\x1b[1m\x1b[91m𐧿  \x1b[97mAll Items:");
+                Console.WriteLine("\t\t\x1b[1m╭" + new string('─', boxWidth - 2) + "╮");
+                Console.WriteLine("\t\t\x1b[1m│" + new string(' ', boxWidth - 2) + "│");
                 foreach (var newItem in _itemsInventory)
                 {
                     Console.WriteLine($"{newItem}");
                 }
-                Console.WriteLine($"\t\t\t ----------");
+                Console.WriteLine("\t\t\x1b[1m│" + new string(' ', boxWidth - 2) + "│");
+                Console.WriteLine("\t\t╰" + new string('─', boxWidth - 2) + "╯");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                throw new Exception($"Not Have List Of Item");
+                throw new Exception($"\x1b[3;97mNot Have List Of Item");
             }
         }
         catch (Exception error)
         {
-            Console.WriteLine($"{error.Message}");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"\t\t\x1b[1;91m⚠︎  {error.Message}");
         }
     }
     public double GetCurrentVolume()
     {
         return _itemsInventory.Sum(item => item.Quantity);
     }
-    public Item? FindItemByName(string itemName)
+    public List<Item> FindItemsByName(string itemName)
     {
         Item? foundItem = _itemsInventory.FirstOrDefault(item => item.Name?.ToLower() == itemName?.ToLower());
-        return foundItem;
+
+        List<Item> similarItems = new List<Item>();
+        if (foundItem != null)
+        {
+            similarItems.Add(foundItem);
+
+            var additionalItems = _itemsInventory
+                .Where(item => item != foundItem && item.Name != null && item.Name.ToLower().Contains(itemName.ToLower()))
+                .ToList();
+
+            similarItems.AddRange(additionalItems);
+        }
+        return similarItems;
     }
-    public List<Item> SortByName(SortOrder sortOrder)
+    public List<Item> SortData(SortOrder sortOrder, SortOrderSpecific sortOrderSpecific)
     {
+        Func<Item, IComparable> sortingKey = sortOrderSpecific switch
+        {
+            SortOrderSpecific.Name => item => item.Name ?? "",
+            SortOrderSpecific.Quantity => item => item.Quantity,
+            SortOrderSpecific.CreatedDate => item => item.CreatedDate,
+            _ => throw new ArgumentException("Invalid sortOrderSpecific value")
+        };
+
         return sortOrder == SortOrder.ASC ?
-             _itemsInventory.OrderBy(item => item.Name).ToList()
-             : _itemsInventory.OrderByDescending(item => item.Name).ToList();
+             _itemsInventory.OrderBy(sortingKey).ToList()
+             : _itemsInventory.OrderByDescending(sortingKey).ToList();
     }
     public Dictionary<string, List<Item>> GroupByDate()
     {
-         int currentMonth = DateTime.Now.Month;
-
+        int currentMonth = DateTime.Now.Month;
         // Calculate the month range for new arrivals (last three months)
         int startMonth = currentMonth - 2;
-        if (startMonth <= 0){
+        if (startMonth <= 0)
+        {
             startMonth += 12; // Adjust for negative values
         }
-
         var groupedItems = _itemsInventory.GroupBy(
-            item =>  item.CreatedDate.Month >= startMonth && item.CreatedDate.Month <= currentMonth  ? "New Arrival Items" : "Old Items"
+            item => item.CreatedDate.Month >= startMonth && item.CreatedDate.Month <= currentMonth ? "New Arrival Items" : "Old Items"
         ).ToDictionary(
             group => group.Key,
             group => group.ToList()
         );
-
-        foreach (var group in groupedItems)
+        if (groupedItems.Any())
         {
-            Console.WriteLine($"\n\x1b[1m| {group.Key} : \x1b");
-            foreach (var item in group.Value)
+            foreach (var group in groupedItems)
             {
-                Console.WriteLine($"- {item.Name} ({item.CreatedDate.ToString("MMMM/dd/yyyy")})");
+                Console.WriteLine($"\n\x1b[1m\x1b[91m\t\t𖼧 \x1b[97m{group.Key} :\x1b[2m\x1b[93m");
+                foreach (var item in group.Value)
+                {
+                    Console.WriteLine($"\t\t𑣪 \x1b[92m{item.Name} \x1b[93m:{item.Quantity}");
+                }
+                Console.WriteLine("\x1b[0m");
             }
-            Console.WriteLine();
         }
-
+        else
+        {
+            Console.WriteLine($"\t\t\x1b[1;91m⚠︎ \x1b[3;97m Not Have Items To Grouped By Date");
+        }
+        return groupedItems;
+    }
+    public Dictionary<string, List<Item>> GroupByQuantity()
+    {
+        var groupedItems = _itemsInventory.GroupBy(
+            item => item.Quantity < 20 ? "Quantity Under 20" : item.Quantity < 50 ? "Quantity Between 20 - 50" : "Quantity Above 50"
+        ).ToDictionary(
+            group => group.Key,
+            group => group.ToList()
+        );
+        if (groupedItems.Any())
+        {
+            foreach (var group in groupedItems)
+            {
+                Console.WriteLine($"\n\x1b[1m\x1b[91m\t\t𖼧 \x1b[97m{group.Key} :\x1b[2m\x1b[93m");
+                foreach (var item in group.Value)
+                {
+                    Console.WriteLine($"\t\t𑣪 \x1b[92m{item.Name} \x1b[93m:{item.Quantity}");
+                }
+                Console.WriteLine("\x1b[0m");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"\t\t\x1b[1;91m⚠︎ \x1b[3;97m Not Have Items To Grouped By Quantity");
+        }
         return groupedItems;
     }
 }
